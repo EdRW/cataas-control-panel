@@ -4,14 +4,36 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <template>
   <header>
-    <h1>CataaS Control Panel</h1>
-    <nav>
-      <RouterLink to="/">Controls</RouterLink>
-      <RouterLink to="/favorites">Favorites</RouterLink>
-    </nav>
+    <div class="container">
+      <h1 class="text-center">CataaS Control Panel</h1>
+      <nav>
+        <ul>
+          <li><RouterLink to="/">Controls</RouterLink></li>
+          <li><RouterLink to="/favorites">Favorites</RouterLink></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
-  <RouterView />
+  <main class="container">
+    <RouterView />
+  </main>
+
+  <footer class="container">
+    <div class="text-center">
+      <small> Copyright &copy; 2024 - Edmund Rosewright. All rights reserved. </small>
+    </div>
+  </footer>
 </template>
 
-<style scoped></style>
+<style scoped>
+main {
+  border: 1px solid var(--pico-primary-border);
+  border-radius: 12px;
+  padding: calc(var(--pico-spacing) * 2);
+}
+
+h1 {
+  padding-top: var(--pico-spacing);
+}
+</style>

@@ -1,1 +1,6 @@
 @import url('@picocss/pico/css/pico.violet.min.css');
+
+html,
+body {
+  height: 100%;
+}

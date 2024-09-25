@@ -1,5 +1,5 @@
 <script setup lang="ts"></script>
 
 <template>
-  <h1>Welcome to Favorites</h1>
+  <h2>Welcome to Favorites</h2>
 </template>
