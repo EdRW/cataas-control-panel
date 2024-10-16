@@ -8,14 +8,23 @@ const loading = ref(false)
 async function fetchRandomCat() {
   const baseUrl = 'https://cataas.com/cat'
   const url = catId.value ? `${baseUrl}/${catId.value}` : baseUrl
+  return await fetch(url)
+}
 
+async function loadCatImageFromFile() {
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  return await fetch('src/assets/cat.jpeg')
+}
+
+const getCat = async () => {
+  const catFetchFn = import.meta.env.DEV ? loadCatImageFromFile : fetchRandomCat
   loading.value = true
-  const response = await fetch(url)
+  const response = await catFetchFn()
   cat.value = URL.createObjectURL(await response.blob())
   loading.value = false
 }
 
-watchEffect(fetchRandomCat)
+watchEffect(getCat)
 </script>
 
 <template>
