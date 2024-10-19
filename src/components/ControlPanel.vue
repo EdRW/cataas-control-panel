@@ -31,7 +31,7 @@ watchEffect(getCat)
   <div class="layout">
     <aside>
       <h2>Control Panel</h2>
-      <button @click="fetchRandomCat" :aria-busy="loading">
+      <button @click="getCat" :aria-busy="loading">
         {{ loading ? 'Loading...' : 'Find Random Cat' }}
       </button>
     </aside>
