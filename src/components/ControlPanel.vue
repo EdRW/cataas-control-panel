@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { cataasFetch, useCataasApi, type CatQueryParams } from '@/api/cataas-api'
-import { onMounted, ref } from 'vue'
+import type { CatQueryParams, CataasFetchOptions } from '@/api/cataas-api'
+import { useCataasFetch } from '@/api/cataas-api'
+import { ref, watchEffect } from 'vue'
 
-const catFetchFn = import.meta.env.DEV ? loadCatImageFromFile : cataasFetch
-const { cat, fetchCat, loading, error } = useCataasApi()
+const cataasFetchOptions = ref<CataasFetchOptions>({})
+
+const { cat, execute, isFetching: loading, error } = useCataasFetch(cataasFetchOptions).image()
 
 const catId = ref('')
 
@@ -14,16 +16,11 @@ const blur = ref(0)
 
 const text = ref('')
 const fontColor = ref('#000000')
-const fontBackground = ref()
-const fontSize = ref<number>()
+const fontBackground = ref('#000000')
+const fontSize = ref<number>(100)
 
-async function loadCatImageFromFile() {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  return await fetch('src/assets/cat.jpeg')
-}
-
-const getCat = async () => {
-  fetchCat({
+watchEffect(() => {
+  cataasFetchOptions.value = {
     pathParams: { gif: gif.value, text: text.value || undefined },
     queryParams: {
       filter: filter.value,
@@ -32,10 +29,12 @@ const getCat = async () => {
       fontBackground: fontBackground.value,
       blur: blur.value
     }
-  })
-}
+  }
+})
 
-onMounted(getCat)
+const getCat = async () => {
+  await execute()
+}
 </script>
 
 <template>
@@ -88,11 +87,17 @@ onMounted(getCat)
         <button :aria-busy="loading">
           {{ loading ? 'Loading...' : 'Find Random Cat' }}
         </button>
+        <small v-if="error" id="error-message">
+          An error occurred while fetching the cat image. Please try again. <br />
+          <code>{{ JSON.stringify(error, null, 2) }}</code>
+        </small>
       </form>
     </aside>
 
     <div class="wrapper">
       <img v-if="cat" :src="cat" alt="Random Cat" />
+      <progress v-if="loading" />
+      <p v-if="!cat && !loading">No cat image available! 🙀</p>
     </div>
   </div>
 </template>

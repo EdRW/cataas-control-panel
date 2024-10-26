@@ -1,4 +1,7 @@
-import { ref } from 'vue'
+import { useFetch, type UseFetchReturn } from '@vueuse/core'
+import type { Nullable } from 'vitest'
+import { computed, ref, toValue, watch, watchEffect, type MaybeRefOrGetter } from 'vue'
+import { z } from 'zod'
 
 const DOMAIN = 'https://cataas.com'
 const PATH = {
@@ -49,12 +52,12 @@ type SizeParams =
 
 type Format =
   | {
-      html?: boolean
-      json?: undefined
+      html?: true
+      json?: false
     }
   | {
-      html?: undefined
-      json?: boolean
+      html?: false
+      json?: true
     }
 
 export type TextQueryParams = {
@@ -85,13 +88,17 @@ export type CatPathParams = {
     }
 )
 
-export async function cataasFetch(
-  catPathParams: CatPathParams = {},
-  catQueryParams: CatQueryParams = {}
-) {
+export type CataasFetchOptions = {
+  pathParams?: CatPathParams
+  queryParams?: CatQueryParams
+}
+
+function constructUrl(options: CataasFetchOptions): string {
+  const { pathParams = {}, queryParams: optionsQueryParams = {} } = options
+
   // change all catPathParams values to string
   const stringCatQueryParams: { [key: string]: string } = Object.fromEntries(
-    Object.entries(catQueryParams)
+    Object.entries(optionsQueryParams)
       .filter(([, value]) => !!value)
       .map(([key, value]) => [key, value?.toString()])
   )
@@ -100,54 +107,143 @@ export async function cataasFetch(
 
   let url = `${DOMAIN}/${PATH.cat}`
 
-  if (catPathParams.id) {
-    url += `/${catPathParams.id}`
-  } else if (catPathParams.tag) {
-    url += `/${catPathParams.tag.join(',')}`
+  if (pathParams.id) {
+    url += `/${pathParams.id}`
+  } else if (pathParams.tag) {
+    url += `/${pathParams.tag.join(',')}`
   }
 
-  if (catPathParams.gif) {
+  if (pathParams.gif) {
     url += `/${PATH.gif}`
   }
 
-  if (catPathParams.text) {
-    url += `/${PATH.says}/${catPathParams.text}`
+  if (pathParams.text) {
+    url += `/${PATH.says}/${pathParams.text}`
   }
 
   if (queryParams.size > 0) {
     url += `?${queryParams.toString()}`
   }
 
-  return await fetch(url)
+  return url
 }
 
-export function useCataasApi(fetchFn?: typeof cataasFetch) {
-  const cat = ref<string | null>(null)
-  const loading = ref(false)
-  const error = ref()
+const CataasJsonResponse = z.object({
+  _id: z.string(),
+  mimetype: z.string(),
+  size: z.number(),
+  tags: z.array(z.string()),
+  createdAt: z.coerce.date(),
+  editedAt: z.coerce.date()
+})
 
-  if (!fetchFn) {
-    fetchFn = cataasFetch
+export type CataasJsonResponse = z.infer<typeof CataasJsonResponse>
+
+export function useCataasFetch(options: MaybeRefOrGetter<CataasFetchOptions> = {}) {
+  const url = computed(() => constructUrl(toValue(options)))
+  const baseFetch = useFetch(url).get()
+
+  type ResponseData<T> = { data: T | null; opts: CataasFetchOptions; contentType: Nullable<string> }
+
+  function wrapFetch<T, Cat>(
+    fetch: UseFetchReturn<T> & PromiseLike<UseFetchReturn<T>>,
+    fn: (resp: ResponseData<T>) => Cat
+  ) {
+    const cat = ref<Cat | null>(null)
+
+    watch(fetch.data, (data) => {
+      const opts = toValue(options)
+
+      const contentType = fetch.response.value?.headers.get('content-type')
+
+      cat.value = fn({ data, opts, contentType })
+    })
+    return {
+      ...fetch,
+      cat
+    }
   }
 
-  const fetchCat = async (
-    options: {
-      pathParams?: CatPathParams
-      queryParams?: CatQueryParams
-    } = {}
-  ) => {
-    const { pathParams = {}, queryParams = {} } = options
+  function getJson() {
+    const jsonFetch = baseFetch.json()
 
-    loading.value = true
-    const response = await fetchFn(pathParams, queryParams)
-    cat.value = URL.createObjectURL(await response.blob())
-    loading.value = false
+    return wrapFetch(jsonFetch, ({ data, opts, contentType }) => {
+      const isJsonContent = contentType?.includes('application/json')
+
+      if (!(opts.queryParams?.json === true && isJsonContent)) {
+        jsonFetch.error.value = new Error(`Invalid content type: ${contentType}, expected json`)
+      }
+
+      const result = CataasJsonResponse.safeParse(data)
+      if (!result.success) {
+        jsonFetch.error.value = result.error
+      }
+
+      return result.data ?? null
+    })
+  }
+
+  function getHtml() {
+    const htmlFetch = baseFetch.text()
+
+    return wrapFetch(htmlFetch, ({ data, opts, contentType }) => {
+      const isHTMLContent = contentType?.includes('html')
+
+      if (!opts.queryParams?.html && isHTMLContent) {
+        htmlFetch.error.value = new Error(`Invalid content type: ${contentType}, expected html`)
+      }
+
+      return data
+    })
+  }
+
+  function getBlob() {
+    const blobFetch = baseFetch.blob()
+
+    return wrapFetch(blobFetch, ({ data, opts, contentType }) => {
+      const isImageContent = contentType?.includes('image')
+
+      if (opts.queryParams?.html || opts.queryParams?.json) {
+        blobFetch.error.value = new Error(
+          'html and json query parameters are not supported for fetching images'
+        )
+      } else if (!isImageContent || !(data instanceof Blob)) {
+        blobFetch.error.value = new Error(`Invalid content type: ${contentType}, expected image`)
+      }
+
+      return data
+    })
+  }
+
+  function getImage() {
+    const cat = ref<string | null>(null)
+    const blobFetch = getBlob()
+
+    watchEffect(() => {
+      if (blobFetch.cat.value) {
+        cat.value = URL.createObjectURL(blobFetch.cat.value)
+      }
+    })
+
+    return {
+      ...blobFetch,
+      cat
+    }
   }
 
   return {
-    cat,
-    fetchCat,
-    loading,
-    error
+    ...baseFetch,
+    json() {
+      return getJson()
+    },
+    html() {
+      return getHtml()
+    },
+    blob() {
+      return getBlob()
+    },
+    image() {
+      return getImage()
+    }
   }
 }
