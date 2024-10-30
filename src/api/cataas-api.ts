@@ -141,7 +141,7 @@ export type CataasJsonResponse = z.infer<typeof CataasJsonResponse>
 
 export function useCataasFetch(options: MaybeRefOrGetter<CataasFetchOptions> = {}) {
   const url = computed(() => constructUrl(toValue(options)))
-  const baseFetch = useFetch(url).get()
+  const baseFetch = useFetch(url, { refetch: true }).get()
 
   type ResponseData<T> = { data: T | null; opts: CataasFetchOptions; contentType: Nullable<string> }
 
