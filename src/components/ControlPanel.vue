@@ -1,23 +1,84 @@
 <script setup lang="ts">
-import type { CatQueryParams, CataasFetchOptions } from '@/api/cataas-api'
+import type { CataasFetchOptions } from '@/api/cataas-api'
 import { useCataasFetch } from '@/api/cataas-api'
-import { ref, watchEffect } from 'vue'
+import {
+  useForm,
+  type BaseFieldProps,
+  type GenericObject,
+  type InputBindsConfig,
+  type LazyInputBindsConfig,
+  type Path,
+  type PathValue,
+  type PublicPathState
+} from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { ref, watchEffect, type MaybeRefOrGetter, type Ref } from 'vue'
+import { z } from 'zod'
 
 const cataasFetchOptions = ref<CataasFetchOptions>({})
 
 const { cat, execute, isFetching: loading, error } = useCataasFetch(cataasFetchOptions).image()
 
-const catId = ref('')
+const formSchema = z.object({
+  id: z.string().default(''),
+  gif: z.boolean().default(false),
+  filter: z.union([z.literal('mono'), z.literal('negate'), z.literal('custom')]).optional(),
+  blur: z.number().min(0).max(1000).default(0),
+  text: z.string().default(''),
+  fontColor: z.string().length(7).default('#000000'),
+  fontBackground: z.string().length(7).optional(),
+  fontSize: z.number().min(1).default(12)
+})
 
-const gif = ref(false)
-const filter = ref<CatQueryParams['filter']>()
+const {
+  values,
+  errors,
+  defineField: _defineField,
+  handleSubmit
+} = useForm({ validationSchema: toTypedSchema(formSchema) })
 
-const blur = ref(0)
+type TValues = typeof values
 
-const text = ref('')
-const fontColor = ref('#000000')
-const fontBackground = ref('#000000')
-const fontSize = ref<number>(100)
+const defineField = <
+  TPath extends Path<TValues>,
+  TValue = PathValue<TValues, TPath>,
+  TExtras extends GenericObject = GenericObject
+>(
+  path: MaybeRefOrGetter<TPath>,
+  config?: Partial<InputBindsConfig<TValue, TExtras>> | LazyInputBindsConfig<TValue, TExtras>
+) => {
+  type RetType = [Ref<TValue>, Ref<BaseFieldProps & TExtras & { 'aria-invalid'?: true }>]
+
+  const configFn = typeof config === 'function' ? config : () => config ?? {}
+
+  return _defineField(path, (state: PublicPathState<TValue>) => {
+    const newConfig = configFn(state)
+    const { props } = newConfig
+    const propsFn = typeof props === 'function' ? props : () => props
+
+    const newProps = propsFn(state) ?? {}
+
+    return {
+      ...newConfig,
+      props: {
+        'aria-invalid': state.errors.length > 0 || undefined,
+        ...newProps
+      }
+    }
+  }) as RetType
+}
+
+const [catId, catIdProps] = defineField('id')
+
+const [gif, gifProps] = defineField('gif')
+const [filter, filterProps] = defineField('filter')
+
+const [blur, blurProps] = defineField('blur')
+
+const [text, textProps] = defineField('text')
+const [fontColor, fontColorProps] = defineField('fontColor')
+const [fontBackground, fontBackgroundProps] = defineField('fontBackground')
+const [fontSize, fontSizeProps] = defineField('fontSize')
 
 watchEffect(() => {
   cataasFetchOptions.value = {
@@ -32,9 +93,26 @@ watchEffect(() => {
   }
 })
 
-const getCat = async () => {
+const onSubmit = handleSubmit(async (values) => {
+  for (const [key, value] of Object.entries(values)) {
+    if (!!value === false) {
+      delete values[key as keyof typeof values]
+    }
+  }
+
+  console.log('submitting', values)
+  cataasFetchOptions.value = {
+    pathParams: values.id ? { id: values.id } : { gif: values.gif, text: values.text },
+    queryParams: {
+      filter: values.filter,
+      fontColor: values.fontColor,
+      fontSize: values.fontSize,
+      fontBackground: values.fontBackground,
+      blur: values.blur
+    }
+  }
   await execute()
-}
+})
 </script>
 
 <template>
@@ -42,46 +120,64 @@ const getCat = async () => {
     <aside>
       <h2>Control Panel</h2>
 
-      <form @submit.prevent="getCat">
+      <form @submit="onSubmit">
         <div>
-          <input type="radio" id="static" :value="false" v-model="gif" />
-          <label for="static">Static</label>
-
-          <input type="radio" id="gif" :value="true" v-model="gif" />
-          <label for="gif">Gif</label>
+          <label for="id">Cat ID</label>
+          <input id="id" type="text" v-model="catId" v-bind="catIdProps" />
+          <small>{{ errors.id }}</small>
         </div>
 
-        <fieldset>
-          <input type="radio" id="no-filter" :value="undefined" v-model="filter" />
-          <label for="no-filter">No Filter</label>
+        <div>
+          <input
+            id="gif"
+            type="checkbox"
+            role="switch"
+            :value="true"
+            v-model="gif"
+            v-bind="gifProps"
+          />
+          <label for="gif">Gif?</label>
+          <small>{{ errors.gif }}</small>
+        </div>
 
-          <input type="radio" id="mono-filter" value="mono" v-model="filter" />
-          <label for="mono-filter">Mono</label>
-
-          <input type="radio" id="negate-filter" value="negate" v-model="filter" />
-          <label for="negate-filter">Negate</label>
-
-          <input type="radio" id="custom-filter" value="custom" v-model="filter" />
-          <label for="custom-filter">Custom</label>
-        </fieldset>
+        <div>
+          <label for="filter">Filter</label>
+          <select id="filter" v-model="filter" v-bind="filterProps">
+            <option :value="undefined" selected>No Filter</option>
+            <option value="mono">Mono</option>
+            <option value="negate">Negate</option>
+            <option value="custom">Custom</option>
+          </select>
+          <small>{{ errors.filter }}</small>
+        </div>
 
         <div>
           <label for="blur">Blur</label>
-          <input type="range" id="blur" min="0" max="10" v-model="blur" />
+          <input type="range" id="blur" min="0" max="1000" v-model="blur" v-bind="blurProps" />
+          <small>{{ errors.blur }}</small>
         </div>
 
         <div>
           <label for="text">Text</label>
-          <input type="text" id="text" v-model="text" />
+          <input type="text" id="text" v-model="text" v-bind="textProps" />
+          <small>{{ errors.text }}</small>
 
           <label for="font-size">Font Size</label>
-          <input type="number" id="font-size" v-model="fontSize" />
+          <input type="number" id="font-size" v-model="fontSize" v-bind="fontSizeProps" />
+          <small>{{ errors.fontSize }}</small>
 
           <label for="text-color">Text Color</label>
-          <input type="color" id="text-color" v-model="fontColor" />
+          <input type="color" id="text-color" v-model="fontColor" v-bind="fontColorProps" />
+          <small>{{ errors.fontColor }}</small>
 
           <label for="font-background">Font Background</label>
-          <input type="color" id="font-background" v-model="fontBackground" />
+          <input
+            type="color"
+            id="font-background"
+            v-model="fontBackground"
+            v-bind="fontBackgroundProps"
+          />
+          <small>{{ errors.fontBackground }}</small>
         </div>
 
         <button :aria-busy="loading">
@@ -98,6 +194,9 @@ const getCat = async () => {
       <img v-if="cat" :src="cat" alt="Random Cat" />
       <progress v-if="loading" />
       <p v-if="!cat && !loading">No cat image available! 🙀</p>
+      <div>
+        {{ values }}
+      </div>
     </div>
   </div>
 </template>
