@@ -24,18 +24,17 @@ const onSubmit = async (values: FormSubmitEvent) => {
 </script>
 
 <template>
-  <div class="layout">
-    <aside>
-      <h2>Control Panel</h2>
-
-      <ControlPanelForm @submit="onSubmit" :loading />
-    </aside>
-
-    <div class="wrapper">
-      <img v-if="cat" :src="cat" alt="Random Cat" />
-      <progress v-if="loading" />
-      <p v-if="!cat && !loading">No cat image available! 🙀</p>
-    </div>
+  <div>
+    <ControlPanelForm @submit="onSubmit" :loading>
+      <div class="wrapper">
+        <template v-if="loading">
+          <progress />
+          <p class="text-center">😻</p>
+        </template>
+        <img v-if="cat" :src="cat" alt="Random Cat" />
+        <p v-if="!cat && !loading">No cat image available! 🙀</p>
+      </div>
+    </ControlPanelForm>
   </div>
 
   <small v-if="error" id="error-message">
@@ -51,23 +50,5 @@ img {
 
 .wrapper {
   height: 600px;
-}
-
-.layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-row-gap: var(--pico-grid-row-gap);
-  height: 100%;
-}
-
-/* bootstrap small breakpoint */
-@media (min-width: 768px) {
-  .layout {
-    grid-template-columns: 1fr 4fr;
-    grid-template-rows: 1fr;
-    grid-column-gap: var(--pico-grid-column-gap);
-    gap: 0px 20px;
-    grid-auto-flow: row;
-  }
 }
 </style>

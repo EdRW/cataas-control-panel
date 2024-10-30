@@ -31,6 +31,15 @@ main {
   border: 1px solid var(--pico-primary-border);
   border-radius: 12px;
   padding: calc(var(--pico-spacing) * 2);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* bootstrap small breakpoint */
+@media (min-width: 768px) {
+  main {
+    overflow: hidden;
+  }
 }
 
 h1 {

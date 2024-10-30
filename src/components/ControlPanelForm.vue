@@ -99,62 +99,76 @@ const onSubmit = handleSubmit(async (allValues) => {
 </script>
 
 <template>
-  <form @submit="onSubmit">
-    <div>
-      <label for="id">Cat ID</label>
-      <input id="id" type="text" v-model="catId" v-bind="catIdProps" />
-      <small>{{ errors.id }}</small>
-    </div>
+  <form @submit="onSubmit" class="layout">
+    <aside>
+      <h2>Control Panel</h2>
+      <div>
+        <label for="id">Cat ID</label>
+        <input id="id" type="text" v-model="catId" v-bind="catIdProps" />
+        <small>{{ errors.id }}</small>
+      </div>
 
-    <div>
-      <input id="gif" type="checkbox" role="switch" :value="true" v-model="gif" v-bind="gifProps" />
-      <label for="gif">Gif?</label>
-      <small>{{ errors.gif }}</small>
-    </div>
+      <div>
+        <input
+          id="gif"
+          type="checkbox"
+          role="switch"
+          :value="true"
+          v-model="gif"
+          v-bind="gifProps"
+        />
+        <label for="gif">Gif?</label>
+        <small>{{ errors.gif }}</small>
+      </div>
 
-    <div>
-      <label for="filter">Filter</label>
-      <select id="filter" v-model="filter" v-bind="filterProps">
-        <option :value="undefined" selected>No Filter</option>
-        <option value="mono">Mono</option>
-        <option value="negate">Negate</option>
-        <option value="custom">Custom</option>
-      </select>
-      <small>{{ errors.filter }}</small>
-    </div>
+      <div>
+        <label for="filter">Filter</label>
+        <select id="filter" v-model="filter" v-bind="filterProps">
+          <option :value="undefined" selected>No Filter</option>
+          <option value="mono">Mono</option>
+          <option value="negate">Negate</option>
+          <option value="custom">Custom</option>
+        </select>
+        <small>{{ errors.filter }}</small>
+      </div>
 
-    <div>
-      <label for="blur">Blur</label>
-      <input type="range" id="blur" min="0" max="1000" v-model="blur" v-bind="blurProps" />
-      <small>{{ errors.blur }}</small>
-    </div>
+      <div>
+        <label for="blur">Blur</label>
+        <input type="range" id="blur" min="0" max="1000" v-model="blur" v-bind="blurProps" />
+        <small>{{ errors.blur }}</small>
+      </div>
+    </aside>
 
-    <div>
-      <label for="text">Text</label>
-      <input type="text" id="text" v-model="text" v-bind="textProps" />
-      <small>{{ errors.text }}</small>
+    <slot></slot>
 
-      <label for="font-size">Font Size</label>
-      <input type="number" id="font-size" v-model="fontSize" v-bind="fontSizeProps" />
-      <small>{{ errors.fontSize }}</small>
+    <aside>
+      <div>
+        <label for="text">Text</label>
+        <input type="text" id="text" v-model="text" v-bind="textProps" />
+        <small>{{ errors.text }}</small>
 
-      <label for="text-color">Text Color</label>
-      <input type="color" id="text-color" v-model="fontColor" v-bind="fontColorProps" />
-      <small>{{ errors.fontColor }}</small>
+        <label for="font-size">Font Size</label>
+        <input type="number" id="font-size" v-model="fontSize" v-bind="fontSizeProps" />
+        <small>{{ errors.fontSize }}</small>
 
-      <label for="font-background">Font Background</label>
-      <input
-        type="color"
-        id="font-background"
-        v-model="fontBackground"
-        v-bind="fontBackgroundProps"
-      />
-      <small>{{ errors.fontBackground }}</small>
-    </div>
+        <label for="text-color">Text Color</label>
+        <input type="color" id="text-color" v-model="fontColor" v-bind="fontColorProps" />
+        <small>{{ errors.fontColor }}</small>
 
-    <button :aria-busy="loading || isSubmitting">
-      {{ loading || isSubmitting ? 'Loading...' : 'Find Random Cat' }}
-    </button>
+        <label for="font-background">Font Background</label>
+        <input
+          type="color"
+          id="font-background"
+          v-model="fontBackground"
+          v-bind="fontBackgroundProps"
+        />
+        <small>{{ errors.fontBackground }}</small>
+      </div>
+
+      <button :aria-busy="loading || isSubmitting">
+        {{ loading || isSubmitting ? 'Loading...' : 'Find Random Cat' }}
+      </button>
+    </aside>
   </form>
 
   <div>
@@ -165,5 +179,23 @@ const onSubmit = handleSubmit(async (allValues) => {
 <style scoped>
 form > * {
   margin: 2em 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-row-gap: var(--pico-grid-row-gap);
+  height: 100%;
+}
+
+/* bootstrap small breakpoint */
+@media (min-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: var(--pico-grid-column-gap);
+    gap: 0px 20px;
+    grid-auto-flow: row;
+  }
 }
 </style>
