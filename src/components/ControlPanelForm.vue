@@ -171,6 +171,7 @@ const onSubmit = handleSubmit(async (allValues) => {
     </aside>
   </form>
 
+  <div>Form Debug</div>
   <div>
     {{ values }}
   </div>
