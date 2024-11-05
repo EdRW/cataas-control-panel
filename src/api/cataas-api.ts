@@ -1,4 +1,4 @@
-import { useFetch, type UseFetchReturn } from '@vueuse/core'
+import { useFetch, type UseFetchOptions, type UseFetchReturn } from '@vueuse/core'
 import type { Nullable } from 'vitest'
 import { computed, ref, toValue, watch, watchEffect, type MaybeRefOrGetter } from 'vue'
 import { z } from 'zod'
@@ -38,27 +38,16 @@ type FilterParams = {
   lightness?: number
 }
 
-type SizeParams =
-  | {
-      type?: Type
-      width?: undefined
-      height?: undefined
-    }
-  | {
-      type?: undefined
-      width?: number
-      height?: number
-    }
+type SizeParams = {
+  type?: Type
+  width?: number
+  height?: number
+}
 
-type Format =
-  | {
-      html?: true
-      json?: false
-    }
-  | {
-      html?: false
-      json?: true
-    }
+type Format = {
+  html?: boolean
+  json?: boolean
+}
 
 export type TextQueryParams = {
   fontSize?: number
@@ -109,7 +98,7 @@ function constructUrl(options: CataasFetchOptions): string {
 
   if (pathParams.id) {
     url += `/${pathParams.id}`
-  } else if (pathParams.tag) {
+  } else if (pathParams.tag && pathParams.tag.length > 0) {
     url += `/${pathParams.tag.join(',')}`
   }
 
@@ -131,17 +120,18 @@ function constructUrl(options: CataasFetchOptions): string {
 const CataasJsonResponse = z.object({
   _id: z.string(),
   mimetype: z.string(),
-  size: z.number(),
+  size: z.number().nullable(),
   tags: z.array(z.string()),
-  createdAt: z.coerce.date(),
-  editedAt: z.coerce.date()
+  createdAt: z.string().datetime(),
+  editedAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime().optional()
 })
 
 export type CataasJsonResponse = z.infer<typeof CataasJsonResponse>
 
 export function useCataasFetch(
   options: MaybeRefOrGetter<CataasFetchOptions> = {},
-  configs: Parameters<typeof useFetch>[1] = {}
+  configs: UseFetchOptions = {}
 ) {
   const url = computed(() => constructUrl(toValue(options)))
   const baseFetch = useFetch(url, configs).get()
@@ -180,6 +170,7 @@ export function useCataasFetch(
       const result = CataasJsonResponse.safeParse(data)
       if (!result.success) {
         jsonFetch.error.value = result.error
+        console.error(result.error.toString(), data)
       }
 
       return result.data ?? null

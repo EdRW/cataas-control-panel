@@ -1,31 +1,68 @@
 <script setup lang="ts">
 import type { CataasFetchOptions } from '@/api/cataas-api'
 import { useCataasFetch } from '@/api/cataas-api'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import ControlPanelForm, { type FormSubmitEvent } from './ControlPanelForm.vue'
 
+const jsonFetchOptions = ref<CataasFetchOptions>({ queryParams: { json: true } })
 const cataasFetchOptions = ref<CataasFetchOptions>({})
 
-const { cat, execute, isFetching: loading, error } = useCataasFetch(cataasFetchOptions).image()
+const {
+  cat: catJson,
+  execute: executeJson,
+  isFetching: loadingJson,
+  error: errorJson
+} = useCataasFetch(jsonFetchOptions).json()
+
+const {
+  cat,
+  execute,
+  isFetching: loadingImg,
+  error: errorImg
+} = useCataasFetch(cataasFetchOptions, { immediate: false }).image()
+
+const loading = computed(() => loadingJson.value || loadingImg.value)
+const error = computed(() => errorJson.value || errorImg.value)
+
+watch(catJson, async (cat) => {
+  if (cat) {
+    console.log('Cat JSON:', cat)
+    const { queryParams = {} } = jsonFetchOptions.value
+    const { json, ...rest } = queryParams
+
+    cataasFetchOptions.value = {
+      pathParams: { id: cat._id },
+      queryParams: {
+        ...rest
+      }
+    }
+    await execute()
+    return
+  }
+})
 
 const onSubmit = async (values: FormSubmitEvent) => {
-  cataasFetchOptions.value = {
-    pathParams: values.id ? { id: values.id } : { gif: values.gif, text: values.text },
+  jsonFetchOptions.value = {
+    pathParams: {
+      text: values.text,
+      ...(values.id ? { id: values.id } : { gif: values.gif, tag: [] })
+    },
     queryParams: {
       filter: values.filter,
       fontColor: values.fontColor,
       fontSize: values.fontSize,
       fontBackground: values.fontBackground,
-      blur: values.blur
+      blur: values.blur,
+      json: true
     }
   }
-  await execute()
+  await executeJson()
 }
 </script>
 
 <template>
   <div>
-    <ControlPanelForm @submit="onSubmit" :loading>
+    <ControlPanelForm @submit="onSubmit" :loading :id="catJson?._id" :tags="catJson?.tags">
       <div class="wrapper">
         <template v-if="loading">
           <progress />

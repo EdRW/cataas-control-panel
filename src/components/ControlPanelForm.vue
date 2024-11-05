@@ -10,11 +10,13 @@ import {
   type PublicPathState
 } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { type MaybeRefOrGetter, type Ref } from 'vue'
+import { watchEffect, type MaybeRefOrGetter, type Ref } from 'vue'
 import { z } from 'zod'
 
-defineProps<{
+const props = defineProps<{
   loading: boolean
+  tags?: string[]
+  id?: string
 }>()
 
 export type FormSubmitEvent = Partial<FormSchema>
@@ -22,11 +24,13 @@ const emit = defineEmits<{
   submit: [values: FormSubmitEvent]
 }>()
 
+const maxBlur = 50
+
 const formSchema = z.object({
   id: z.string().default(''),
   gif: z.boolean().default(false),
   filter: z.union([z.literal('mono'), z.literal('negate'), z.literal('custom')]).optional(),
-  blur: z.number().min(0).max(1000).default(0),
+  blur: z.coerce.number().min(0).max(maxBlur).default(0),
   text: z.string().default(''),
   fontColor: z.string().length(7).default('#000000'),
   fontBackground: z.string().length(7).optional(),
@@ -40,8 +44,15 @@ const {
   errors,
   defineField: _defineField,
   handleSubmit,
-  isSubmitting
+  isSubmitting,
+  setFieldValue
 } = useForm({ validationSchema: toTypedSchema(formSchema) })
+
+watchEffect(() => {
+  if (props.id) {
+    setFieldValue('id', props.id)
+  }
+})
 
 type TValues = typeof values
 
@@ -134,7 +145,7 @@ const onSubmit = handleSubmit(async (allValues) => {
 
       <div>
         <label for="blur">Blur</label>
-        <input type="range" id="blur" min="0" max="1000" v-model="blur" v-bind="blurProps" />
+        <input type="range" id="blur" min="0" :max="maxBlur" v-model="blur" v-bind="blurProps" />
         <small>{{ errors.blur }}</small>
       </div>
     </aside>
@@ -170,11 +181,6 @@ const onSubmit = handleSubmit(async (allValues) => {
       </button>
     </aside>
   </form>
-
-  <div>Form Debug</div>
-  <div>
-    {{ values }}
-  </div>
 </template>
 
 <style scoped>
