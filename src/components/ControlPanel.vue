@@ -61,7 +61,13 @@ const onSubmit = async (values: FormSubmitEvent) => {
 </script>
 
 <template>
-  <ControlPanelForm @submit="onSubmit" :loading :id="catJson?._id" :tags="catJson?.tags">
+  <ControlPanelForm
+    @random-clicked="onSubmit"
+    @modify-clicked="onSubmit"
+    :loading
+    :id="catJson?._id"
+    :tags="catJson?.tags"
+  >
     <template v-if="loading">
       <div class="progress-wrapper">
         <progress />

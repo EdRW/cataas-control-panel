@@ -21,7 +21,9 @@ const props = defineProps<{
 
 export type FormSubmitEvent = Partial<FormSchema>
 const emit = defineEmits<{
-  submit: [values: FormSubmitEvent]
+  modifyClicked: [values: FormSubmitEvent]
+  randomClicked: [values: FormSubmitEvent]
+  saveClicked: [values: FormSubmitEvent]
 }>()
 
 const maxBlur = 50
@@ -45,7 +47,9 @@ const {
   defineField: _defineField,
   handleSubmit,
   isSubmitting,
-  setFieldValue
+  setFieldValue,
+  meta,
+  resetForm
 } = useForm({ validationSchema: toTypedSchema(formSchema) })
 
 watchEffect(() => {
@@ -102,15 +106,47 @@ function removeEmptyValues<T extends Record<string, unknown>>(obj: T): Partial<T
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => !!v)) as Partial<T>
 }
 
-const onSubmit = handleSubmit(async (allValues) => {
-  const values = removeEmptyValues(allValues)
-  console.log('submitting', values)
-  emit('submit', values)
-})
+type FormAction = 'random' | 'save' | 'modify'
+const onSubmit = async (action: FormAction) => {
+  const onSubmitHandler = handleSubmit((allValues) => {
+    const values = removeEmptyValues(allValues)
+
+    if (action === 'random') {
+      if (values.id) {
+        delete values.id
+      }
+      console.log('random', values)
+      resetForm({
+        touched: {},
+        values: allValues
+      })
+      emit('randomClicked', values)
+      return
+    }
+
+    if (action === 'modify') {
+      console.log('submitting', values)
+      resetForm({
+        touched: {},
+        values: allValues
+      })
+      emit('modifyClicked', values)
+      return
+    }
+
+    if (action === 'save') {
+      console.log('saving', values)
+      emit('saveClicked', values)
+      return
+    }
+  })
+
+  await onSubmitHandler()
+}
 </script>
 
 <template>
-  <form @submit="onSubmit" class="layout">
+  <form class="layout">
     <div class="img-slot-wrapper">
       <slot></slot>
     </div>
@@ -198,13 +234,18 @@ const onSubmit = handleSubmit(async (allValues) => {
       </div>
     </div>
     <div class="form-controls-3">
-      <button :aria-busy="loading || isSubmitting" type="submit">
-        {{ loading || isSubmitting ? 'Loading...' : 'Modify Current Cat' }}
-      </button>
-      <button :aria-busy="loading || isSubmitting" type="button">
+      <button :aria-busy="loading || isSubmitting" type="button" @click="onSubmit('random')">
         {{ loading || isSubmitting ? 'Loading...' : 'New Random Cat' }}
       </button>
-      <button :aria-busy="loading || isSubmitting" type="button">
+      <button
+        :aria-busy="loading || isSubmitting"
+        type="button"
+        :disabled="!meta.touched"
+        @click="onSubmit('modify')"
+      >
+        {{ loading || isSubmitting ? 'Loading...' : 'Modify Current Cat' }}
+      </button>
+      <button :aria-busy="loading || isSubmitting" type="button" @click="onSubmit('save')">
         {{ loading || isSubmitting ? 'Loading...' : 'Save Cat' }}
       </button>
     </div>
