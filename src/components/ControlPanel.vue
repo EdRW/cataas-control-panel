@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { useCataasFetch, type CataasFetchOptions } from '@/composables/useCataasFetch'
+import {
+  useCataasFetch,
+  useCataasTags,
+  type CataasFetchOptions
+} from '@/composables/useCataasFetch'
 import { computed, ref, watch } from 'vue'
 import ControlPanelForm, { type FormSubmitEvent } from './ControlPanelForm.vue'
 import { useFavorites } from '@/composables/useFavorites'
 
 const jsonFetchOptions = ref<CataasFetchOptions>({ queryParams: { json: true } })
 const cataasFetchOptions = ref<CataasFetchOptions>({})
+
+const { tags } = useCataasTags()
 
 const {
   cat: catJson,
@@ -47,7 +53,7 @@ const onSubmit = async (values: FormSubmitEvent) => {
   jsonFetchOptions.value = {
     pathParams: {
       text: values.text,
-      ...(values.id ? { id: values.id } : { gif: values.gif, tag: [] })
+      ...(values.id ? { id: values.id } : { gif: values.gif, tag: values.tags })
     },
     queryParams: {
       filter: values.filter,
@@ -89,7 +95,7 @@ const onSave = (values: FormSubmitEvent) => {
     :loading
     :saving
     :id="catJson?._id"
-    :tags="catJson?.tags"
+    :tags
   >
     <template v-if="loading">
       <div class="progress-wrapper">

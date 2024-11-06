@@ -38,7 +38,8 @@ const formSchema = z.object({
   text: z.string().default(''),
   fontColor: z.string().length(7).default('#000000'),
   fontBackground: z.string().length(7).optional(),
-  fontSize: z.number().min(1).default(50)
+  fontSize: z.number().min(1).default(50),
+  tags: z.array(z.string()).default([])
 })
 
 type FormSchema = z.infer<typeof formSchema>
@@ -92,16 +93,14 @@ const defineField = <
 }
 
 const [catId, catIdProps] = defineField('id')
-
 const [gif, gifProps] = defineField('gif')
 const [filter, filterProps] = defineField('filter')
-
 const [blur, blurProps] = defineField('blur')
-
 const [text, textProps] = defineField('text')
 const [fontColor, fontColorProps] = defineField('fontColor')
 const [fontBackground, fontBackgroundProps] = defineField('fontBackground')
 const [fontSize, fontSizeProps] = defineField('fontSize')
+const [selectedTags, tagsProps] = defineField('tags')
 
 // This could be generalized as filterObjectProperties using a predicate
 function removeEmptyValues<T extends Record<string, unknown>>(obj: T): Partial<T> {
@@ -152,6 +151,7 @@ const onSubmit = async (action: FormAction) => {
     <div class="img-slot-wrapper">
       <slot></slot>
     </div>
+
     <div class="form-controls-1">
       <div class="grid">
         <div>
@@ -191,6 +191,7 @@ const onSubmit = async (action: FormAction) => {
         </div>
       </div>
     </div>
+
     <div class="form-controls-2">
       <div>
         <label for="text">Text</label>
@@ -233,6 +234,14 @@ const onSubmit = async (action: FormAction) => {
             <small>{{ errors.fontBackground }}</small>
           </div>
         </fieldset>
+      </div>
+
+      <div>
+        <label for="tags">Tags</label>
+        <select id="tags" multiple size="10" v-model="selectedTags" v-bind="tagsProps">
+          <option disabled value="">Select the cutest tags...</option>
+          <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
+        </select>
       </div>
     </div>
     <div class="form-controls-3">

@@ -7,7 +7,9 @@ const DOMAIN = 'https://cataas.com'
 const PATH = {
   cat: 'cat',
   gif: 'gif',
-  says: 'says'
+  says: 'says',
+  api: 'api',
+  tags: 'tags'
 } as const
 
 export type Type = 'square' | 'medium' | 'small' | 'xsmall'
@@ -239,5 +241,22 @@ export function useCataasFetch(
     image() {
       return getImage()
     }
+  }
+}
+
+export function useCataasTags(configs: UseFetchOptions = {}) {
+  const url = [DOMAIN, PATH.api, PATH.tags].join('/')
+
+  const { data, ...rest } = useFetch(url, configs).get().json()
+
+  // TODO: properly handle error
+  const tags = computed(() => {
+    const tags = z.array(z.string()).safeParse(data.value)?.data ?? []
+    return tags.filter((tag) => tag !== '' && tag.length > 1)
+  })
+
+  return {
+    tags,
+    ...rest
   }
 }
