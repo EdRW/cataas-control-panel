@@ -62,14 +62,14 @@ const onSubmit = async (values: FormSubmitEvent) => {
 
 <template>
   <ControlPanelForm @submit="onSubmit" :loading :id="catJson?._id" :tags="catJson?.tags">
-    <div class="wrapper">
-      <template v-if="loading">
+    <template v-if="loading">
+      <div class="progress-wrapper">
         <progress />
         <p class="text-center">😻</p>
-      </template>
-      <img v-if="cat" :src="cat" alt="Random Cat" />
-      <p v-if="!cat && !loading">No cat image available! 🙀</p>
-    </div>
+      </div>
+    </template>
+    <img v-if="cat && !loading" :src="cat" alt="Random Cat" />
+    <p v-if="!cat && !loading">No cat image available! 🙀</p>
   </ControlPanelForm>
 
   <small v-if="error" id="error-message">
@@ -79,12 +79,11 @@ const onSubmit = async (values: FormSubmitEvent) => {
 </template>
 
 <style scoped>
-.wrapper {
-  max-width: 100%;
-  max-height: 100%;
+.progress-wrapper {
+  width: 100%;
 }
 
-.wrapper > img {
+img {
   max-width: 100%;
   max-height: 100%;
   border-radius: 10px;

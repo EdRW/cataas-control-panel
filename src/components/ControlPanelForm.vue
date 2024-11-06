@@ -201,10 +201,10 @@ const onSubmit = handleSubmit(async (allValues) => {
       <button :aria-busy="loading || isSubmitting" type="submit">
         {{ loading || isSubmitting ? 'Loading...' : 'Modify Current Cat' }}
       </button>
-      <button :aria-busy="loading || isSubmitting" type="submit">
+      <button :aria-busy="loading || isSubmitting" type="button">
         {{ loading || isSubmitting ? 'Loading...' : 'New Random Cat' }}
       </button>
-      <button :aria-busy="loading || isSubmitting" type="submit">
+      <button :aria-busy="loading || isSubmitting" type="button">
         {{ loading || isSubmitting ? 'Loading...' : 'Save Cat' }}
       </button>
     </div>
@@ -228,6 +228,10 @@ form > * {
   grid-template-columns: 1fr;
   grid-row-gap: var(--pico-grid-row-gap);
   height: 100%;
+  width: 100%;
+}
+
+form button[type='button'] {
   width: 100%;
 }
 
