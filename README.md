@@ -1,18 +1,18 @@
-# cataas-control-panel
+# Cataas Control Panel 🐱
 
-This template should help get you started developing with Vue 3 in Vite.
+Cataas Control Panel is a Vue 3 frontend for the super cute [Cat as a Service](https://cataas.com/) project. 😻
 
-## Recommended IDE Setup
+Cat as a Service is a REST API to spread peace and love (or not) thanks to cats. 😼
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Check out the Cataas Control Panel at [cataas.edrw.dev](https://cataas.edrw.dev)!
 
-## Type Support for `.vue` Imports in TS
+## Features
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- [x] Fetch random cat images
+- [x] Modify cat images by adding text, filters, and more
+- [ ] Save your favorite cat images 🚧
+- [ ] Share cat images with your friends
+- [ ] Search for cat images by Tag
 
 ## Project Setup
 
