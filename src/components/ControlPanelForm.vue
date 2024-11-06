@@ -21,7 +21,7 @@ const props = defineProps<{
 
 export type FormSubmitEvent = Partial<FormSchema>
 const emit = defineEmits<{
-  modifyClicked: [values: FormSubmitEvent]
+  customizeClicked: [values: FormSubmitEvent]
   randomClicked: [values: FormSubmitEvent]
   saveClicked: [values: FormSubmitEvent]
 }>()
@@ -106,7 +106,7 @@ function removeEmptyValues<T extends Record<string, unknown>>(obj: T): Partial<T
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => !!v)) as Partial<T>
 }
 
-type FormAction = 'random' | 'save' | 'modify'
+type FormAction = 'random' | 'save' | 'customize'
 const onSubmit = async (action: FormAction) => {
   const onSubmitHandler = handleSubmit((allValues) => {
     const values = removeEmptyValues(allValues)
@@ -124,13 +124,13 @@ const onSubmit = async (action: FormAction) => {
       return
     }
 
-    if (action === 'modify') {
+    if (action === 'customize') {
       console.log('submitting', values)
       resetForm({
         touched: {},
         values: allValues
       })
-      emit('modifyClicked', values)
+      emit('customizeClicked', values)
       return
     }
 
@@ -241,9 +241,9 @@ const onSubmit = async (action: FormAction) => {
         :aria-busy="loading || isSubmitting"
         type="button"
         :disabled="!meta.touched"
-        @click="onSubmit('modify')"
+        @click="onSubmit('customize')"
       >
-        {{ loading || isSubmitting ? 'Loading...' : 'Modify Current Cat' }}
+        {{ loading || isSubmitting ? 'Loading...' : 'Customize Cat' }}
       </button>
       <button :aria-busy="loading || isSubmitting" type="button" @click="onSubmit('save')">
         {{ loading || isSubmitting ? 'Loading...' : 'Save Cat' }}

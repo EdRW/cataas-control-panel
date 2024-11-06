@@ -9,7 +9,7 @@ Check out the Cataas Control Panel at [cataas.edrw.dev](https://cataas.edrw.dev)
 ## Features
 
 - [x] Fetch random cat images
-- [x] Modify cat images by adding text, filters, and more
+- [x] Customize cat images by adding text, filters, and more
 - [ ] Save your favorite cat images 🚧
 - [ ] Share cat images with your friends
 - [ ] Search for cat images by Tag

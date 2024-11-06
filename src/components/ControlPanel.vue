@@ -62,7 +62,7 @@ const onSubmit = async (values: FormSubmitEvent) => {
 <template>
   <ControlPanelForm
     @random-clicked="onSubmit"
-    @modify-clicked="onSubmit"
+    @customize-clicked="onSubmit"
     :loading
     :id="catJson?._id"
     :tags="catJson?.tags"
