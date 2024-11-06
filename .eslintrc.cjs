@@ -11,8 +11,7 @@ module.exports = {
   ],
   overrides: [
     {
-      files: ['e2e/**/*.{test,spec}.{js,ts,jsx,tsx}'],
-      extends: ['plugin:playwright/recommended'],
+      files: ['**/*.{js,ts,jsx,tsx,vue}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/no-unused-vars': [
@@ -23,6 +22,10 @@ module.exports = {
           }
         ]
       }
+    },
+    {
+      files: ['e2e/**/*.{test,spec}.{js,ts,jsx,tsx}'],
+      extends: ['plugin:playwright/recommended']
     }
   ],
   parserOptions: {
