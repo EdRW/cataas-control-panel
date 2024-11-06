@@ -61,18 +61,16 @@ const onSubmit = async (values: FormSubmitEvent) => {
 </script>
 
 <template>
-  <div>
-    <ControlPanelForm @submit="onSubmit" :loading :id="catJson?._id" :tags="catJson?.tags">
-      <div class="wrapper">
-        <template v-if="loading">
-          <progress />
-          <p class="text-center">😻</p>
-        </template>
-        <img v-if="cat" :src="cat" alt="Random Cat" />
-        <p v-if="!cat && !loading">No cat image available! 🙀</p>
-      </div>
-    </ControlPanelForm>
-  </div>
+  <ControlPanelForm @submit="onSubmit" :loading :id="catJson?._id" :tags="catJson?.tags">
+    <div class="wrapper">
+      <template v-if="loading">
+        <progress />
+        <p class="text-center">😻</p>
+      </template>
+      <img v-if="cat" :src="cat" alt="Random Cat" />
+      <p v-if="!cat && !loading">No cat image available! 🙀</p>
+    </div>
+  </ControlPanelForm>
 
   <small v-if="error" id="error-message">
     An error occurred while fetching the cat image. Please try again. <br />
@@ -81,11 +79,14 @@ const onSubmit = async (values: FormSubmitEvent) => {
 </template>
 
 <style scoped>
-img {
+.wrapper {
+  max-width: 100%;
   max-height: 100%;
 }
 
-.wrapper {
-  height: 600px;
+.wrapper > img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 10px;
 }
 </style>

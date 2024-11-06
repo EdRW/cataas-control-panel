@@ -111,81 +111,116 @@ const onSubmit = handleSubmit(async (allValues) => {
 
 <template>
   <form @submit="onSubmit" class="layout">
-    <aside>
-      <h2>Control Panel</h2>
-      <div>
-        <label for="id">Cat ID</label>
-        <input id="id" type="text" v-model="catId" v-bind="catIdProps" />
-        <small>{{ errors.id }}</small>
+    <div class="img-slot-wrapper">
+      <slot></slot>
+    </div>
+    <div class="form-controls-1">
+      <div class="grid">
+        <div>
+          <label for="id">Cat ID</label>
+          <input id="id" type="text" v-model="catId" v-bind="catIdProps" />
+          <small>{{ errors.id }}</small>
+        </div>
+
+        <div>
+          <label for="filter">Filter</label>
+          <select id="filter" v-model="filter" v-bind="filterProps">
+            <option :value="undefined" selected>No Filter</option>
+            <option value="mono">Mono</option>
+            <option value="negate">Negate</option>
+            <option value="custom">Custom</option>
+          </select>
+          <small>{{ errors.filter }}</small>
+        </div>
       </div>
-
-      <div>
-        <input
-          id="gif"
-          type="checkbox"
-          role="switch"
-          :value="true"
-          v-model="gif"
-          v-bind="gifProps"
-        />
-        <label for="gif">Gif?</label>
-        <small>{{ errors.gif }}</small>
+      <div class="grid">
+        <div>
+          <label for="gif">Gif?</label>
+          <input
+            id="gif"
+            type="checkbox"
+            role="switch"
+            :value="true"
+            v-model="gif"
+            v-bind="gifProps"
+          />
+          <small>{{ errors.gif }}</small>
+        </div>
+        <div>
+          <label for="blur">Blur</label>
+          <input type="range" id="blur" min="0" :max="maxBlur" v-model="blur" v-bind="blurProps" />
+          <small>{{ errors.blur }}</small>
+        </div>
       </div>
-
-      <div>
-        <label for="filter">Filter</label>
-        <select id="filter" v-model="filter" v-bind="filterProps">
-          <option :value="undefined" selected>No Filter</option>
-          <option value="mono">Mono</option>
-          <option value="negate">Negate</option>
-          <option value="custom">Custom</option>
-        </select>
-        <small>{{ errors.filter }}</small>
-      </div>
-
-      <div>
-        <label for="blur">Blur</label>
-        <input type="range" id="blur" min="0" :max="maxBlur" v-model="blur" v-bind="blurProps" />
-        <small>{{ errors.blur }}</small>
-      </div>
-    </aside>
-
-    <slot></slot>
-
-    <aside>
+    </div>
+    <div class="form-controls-2">
       <div>
         <label for="text">Text</label>
         <input type="text" id="text" v-model="text" v-bind="textProps" />
         <small>{{ errors.text }}</small>
 
-        <label for="font-size">Font Size</label>
-        <input type="number" id="font-size" v-model="fontSize" v-bind="fontSizeProps" />
-        <small>{{ errors.fontSize }}</small>
+        <fieldset class="grid">
+          <div>
+            <label for="font-size">Size</label>
+            <input
+              type="number"
+              id="font-size"
+              class="size-picker"
+              v-model="fontSize"
+              v-bind="fontSizeProps"
+            />
+            <small>{{ errors.fontSize }}</small>
+          </div>
+          <div>
+            <label for="text-color">Color</label>
+            <input
+              type="color"
+              id="text-color"
+              class="color-picker"
+              v-model="fontColor"
+              v-bind="fontColorProps"
+            />
+            <small>{{ errors.fontColor }}</small>
+          </div>
 
-        <label for="text-color">Text Color</label>
-        <input type="color" id="text-color" v-model="fontColor" v-bind="fontColorProps" />
-        <small>{{ errors.fontColor }}</small>
-
-        <label for="font-background">Font Background</label>
-        <input
-          type="color"
-          id="font-background"
-          v-model="fontBackground"
-          v-bind="fontBackgroundProps"
-        />
-        <small>{{ errors.fontBackground }}</small>
+          <div>
+            <label for="font-background" class="no-wrap">BG Color</label>
+            <input
+              type="color"
+              id="font-background"
+              class="color-picker"
+              v-model="fontBackground"
+              v-bind="fontBackgroundProps"
+            />
+            <small>{{ errors.fontBackground }}</small>
+          </div>
+        </fieldset>
       </div>
-
-      <button :aria-busy="loading || isSubmitting">
-        {{ loading || isSubmitting ? 'Loading...' : 'Find Random Cat' }}
+    </div>
+    <div class="form-controls-3">
+      <button :aria-busy="loading || isSubmitting" type="submit">
+        {{ loading || isSubmitting ? 'Loading...' : 'Modify Current Cat' }}
       </button>
-    </aside>
+      <button :aria-busy="loading || isSubmitting" type="submit">
+        {{ loading || isSubmitting ? 'Loading...' : 'New Random Cat' }}
+      </button>
+      <button :aria-busy="loading || isSubmitting" type="submit">
+        {{ loading || isSubmitting ? 'Loading...' : 'Save Cat' }}
+      </button>
+    </div>
   </form>
 </template>
 
 <style scoped>
+form {
+  --square-input-width: calc(
+    1rem * var(--pico-line-height) + var(--pico-form-element-spacing-vertical) * 2 +
+      var(--pico-border-width) * 2
+  );
+}
+
 form > * {
-  margin: 2em 0;
+  margin: 1em 0;
 }
 
 .layout {
@@ -193,16 +228,49 @@ form > * {
   grid-template-columns: 1fr;
   grid-row-gap: var(--pico-grid-row-gap);
   height: 100%;
+  width: 100%;
 }
 
 /* bootstrap small breakpoint */
 @media (min-width: 768px) {
   .layout {
-    grid-template-columns: 1fr 3fr 1fr;
-    grid-template-rows: 1fr;
     grid-column-gap: var(--pico-grid-column-gap);
-    gap: 0px 20px;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 3fr 1fr;
     grid-auto-flow: row;
+    grid-template-areas:
+      'cat-image form-controls-2'
+      'form-controls-1 form-controls-3';
+  }
+
+  .img-slot-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-area: cat-image;
+    contain: size;
+  }
+
+  .form-controls-1 {
+    grid-area: form-controls-1;
+  }
+
+  .form-controls-2 {
+    grid-area: form-controls-2;
+  }
+
+  .form-controls-3 {
+    grid-area: form-controls-3;
+  }
+
+  .size-picker {
+    width: var(--square-input-width);
+    padding-right: 0;
+  }
+
+  .color-picker {
+    padding: var(--pico-form-element-spacing-vertical);
+    width: var(--square-input-width);
   }
 }
 </style>
