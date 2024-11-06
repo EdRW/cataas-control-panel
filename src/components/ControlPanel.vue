@@ -28,18 +28,18 @@ watch(catJson, async (cat) => {
   if (cat) {
     console.log('Cat JSON:', cat)
     const { pathParams = {}, queryParams = {} } = jsonFetchOptions.value
-    pathParams.id = cat._id
-
     const { json, ...rest } = queryParams
 
     cataasFetchOptions.value = {
-      pathParams,
+      pathParams: {
+        id: cat._id,
+        text: pathParams.text
+      },
       queryParams: {
         ...rest
       }
     }
     await execute()
-    return
   }
 })
 
@@ -66,7 +66,6 @@ const saving = ref(false)
 
 const onSave = (values: FormSubmitEvent) => {
   saving.value = true
-  console.log('Saving:', values)
 
   if (!values.id) {
     console.error('Cannot save a cat image that is missing an ID!')
@@ -78,7 +77,6 @@ const onSave = (values: FormSubmitEvent) => {
 
   addFavorite(id, rest)
 
-  console.log('Favorite added:', id)
   saving.value = false
 }
 </script>
