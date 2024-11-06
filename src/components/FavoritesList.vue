@@ -26,7 +26,7 @@ const handleEdit = (id: FavoriteCatId) => {
 </script>
 
 <template>
-  <div class="grid">
+  <div class="grid favorites-grid">
     <template v-for="favorite in favorites" :key="favorite.id">
       <FavoritesListCard
         :favoriteCat="favorite"
@@ -38,4 +38,10 @@ const handleEdit = (id: FavoriteCatId) => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+@media (min-width: 768px) {
+  .favorites-grid {
+    grid-template-columns: repeat(auto-fit, minmax(406px, 1fr));
+  }
+}
+</style>

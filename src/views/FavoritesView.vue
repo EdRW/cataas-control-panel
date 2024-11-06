@@ -3,6 +3,15 @@ import FavoritesList from '@/components/FavoritesList.vue'
 </script>
 
 <template>
-  <h2>Welcome to Favorites 😻</h2>
-  <FavoritesList />
+  <div class="scrollable-container">
+    <FavoritesList />
+  </div>
 </template>
+
+<style scoped>
+.scrollable-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+}
+</style>

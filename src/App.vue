@@ -32,13 +32,7 @@ main {
   border-radius: 12px;
   padding: calc(var(--pico-spacing) * 2);
   scrollbar-width: thin;
-}
-
-/* bootstrap small breakpoint */
-@media (min-width: 768px) {
-  main {
-    overflow: hidden;
-  }
+  overflow: hidden;
 }
 
 h1 {
