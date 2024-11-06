@@ -16,7 +16,11 @@ import { RouterLink, RouterView } from 'vue-router'
   </header>
 
   <main class="container">
-    <RouterView />
+    <RouterView v-slot="{ Component }">
+      <KeepAlive>
+        <component :is="Component" />
+      </KeepAlive>
+    </RouterView>
   </main>
 
   <footer class="container">
