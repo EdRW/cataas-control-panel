@@ -38,7 +38,7 @@ const formSchema = z.object({
   text: z.string().default(''),
   fontColor: z.string().length(7).default('#000000'),
   fontBackground: z.string().length(7).optional(),
-  fontSize: z.number().min(1).default(12)
+  fontSize: z.number().min(1).default(50)
 })
 
 type FormSchema = z.infer<typeof formSchema>
