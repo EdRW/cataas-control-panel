@@ -15,6 +15,7 @@ import { z } from 'zod'
 
 const props = defineProps<{
   loading: boolean
+  saving: boolean
   tags?: string[]
   id?: string
 }>()
@@ -26,6 +27,7 @@ const emit = defineEmits<{
   saveClicked: [values: FormSubmitEvent]
 }>()
 
+// TODO: Move to composables directory
 const maxBlur = 50
 
 const formSchema = z.object({
@@ -245,8 +247,13 @@ const onSubmit = async (action: FormAction) => {
       >
         {{ loading || isSubmitting ? 'Loading...' : 'Customize Cat' }}
       </button>
-      <button :aria-busy="loading || isSubmitting" type="button" @click="onSubmit('save')">
-        {{ loading || isSubmitting ? 'Loading...' : 'Save Cat' }}
+      <button
+        :aria-busy="saving"
+        :disabled="loading || isSubmitting"
+        type="button"
+        @click="onSubmit('save')"
+      >
+        {{ saving ? 'Saving...' : 'Save Cat' }}
       </button>
     </div>
   </form>

@@ -2,6 +2,7 @@
 import { useCataasFetch, type CataasFetchOptions } from '@/composables/cataas-api'
 import { computed, ref, watch } from 'vue'
 import ControlPanelForm, { type FormSubmitEvent } from './ControlPanelForm.vue'
+import { useFavorites } from '@/composables/useFavorites'
 
 const jsonFetchOptions = ref<CataasFetchOptions>({ queryParams: { json: true } })
 const cataasFetchOptions = ref<CataasFetchOptions>({})
@@ -26,11 +27,13 @@ const error = computed(() => errorJson.value || errorImg.value)
 watch(catJson, async (cat) => {
   if (cat) {
     console.log('Cat JSON:', cat)
-    const { queryParams = {} } = jsonFetchOptions.value
+    const { pathParams = {}, queryParams = {} } = jsonFetchOptions.value
+    pathParams.id = cat._id
+
     const { json, ...rest } = queryParams
 
     cataasFetchOptions.value = {
-      pathParams: { id: cat._id },
+      pathParams,
       queryParams: {
         ...rest
       }
@@ -57,13 +60,36 @@ const onSubmit = async (values: FormSubmitEvent) => {
   }
   await executeJson()
 }
+
+const { addFavorite } = useFavorites()
+const saving = ref(false)
+
+const onSave = (values: FormSubmitEvent) => {
+  saving.value = true
+  console.log('Saving:', values)
+
+  if (!values.id) {
+    console.error('Cannot save a cat image that is missing an ID!')
+    saving.value = false
+    return
+  }
+
+  const { id, ...rest } = values
+
+  addFavorite(id, rest)
+
+  console.log('Favorite added:', id)
+  saving.value = false
+}
 </script>
 
 <template>
   <ControlPanelForm
     @random-clicked="onSubmit"
     @customize-clicked="onSubmit"
+    @save-clicked="onSave"
     :loading
+    :saving
     :id="catJson?._id"
     :tags="catJson?.tags"
   >

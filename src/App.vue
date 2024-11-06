@@ -5,7 +5,7 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <header>
     <div class="container">
-      <h1 class="text-center">CataaS Control Panel</h1>
+      <h1 class="text-center">CataaS Control Panel 😸</h1>
       <nav>
         <ul>
           <li><RouterLink to="/">Controls</RouterLink></li>
