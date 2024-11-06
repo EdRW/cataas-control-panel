@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCataasFetch, type CataasFetchOptions } from '@/composables/cataas-api'
+import { useCataasFetch, type CataasFetchOptions } from '@/composables/useCataasFetch'
 import { type FavoriteCat, type FavoriteCatId } from '@/composables/useFavorites'
 import { computed } from 'vue'
 

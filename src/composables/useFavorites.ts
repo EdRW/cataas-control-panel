@@ -1,6 +1,6 @@
 import { useStorage } from '@vueuse/core'
 import { z } from 'zod'
-import type { CatQueryParams } from './cataas-api'
+import type { CatQueryParams } from './useCataasFetch'
 
 const favoriteCatId = z.string().brand<'Cataas_ID'>()
 export type FavoriteCatId = z.infer<typeof favoriteCatId>

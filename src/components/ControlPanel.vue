@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCataasFetch, type CataasFetchOptions } from '@/composables/cataas-api'
+import { useCataasFetch, type CataasFetchOptions } from '@/composables/useCataasFetch'
 import { computed, ref, watch } from 'vue'
 import ControlPanelForm, { type FormSubmitEvent } from './ControlPanelForm.vue'
 import { useFavorites } from '@/composables/useFavorites'
