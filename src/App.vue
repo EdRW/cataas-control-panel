@@ -4,8 +4,17 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <template>
   <header>
-    <div class="container">
-      <h1 class="text-center">CataaS Control Panel 😸</h1>
+    <div class="container text-center">
+      <hgroup>
+        <h1>CataaS Control Panel 😸</h1>
+        <p>
+          A frontend for the
+          <a href="https://cataas.com" target="_blank" rel="noopener noreferrer"
+            >Cat as a Service</a
+          >
+          REST API
+        </p>
+      </hgroup>
       <nav>
         <ul>
           <li><RouterLink to="/">Controls</RouterLink></li>
@@ -41,5 +50,11 @@ main {
 
 h1 {
   padding-top: var(--pico-spacing);
+}
+
+@media (min-width: 768px) {
+  hgroup {
+    margin-bottom: calc(var(--pico-spacing) * -1.5);
+  }
 }
 </style>

@@ -26,7 +26,10 @@ const handleEdit = (id: FavoriteCatId) => {
 </script>
 
 <template>
-  <div class="grid favorites-grid">
+  <div v-if="favorites.length === 0" class="empty-list-container">
+    <h3>No saved cats yet! 😿</h3>
+  </div>
+  <div v-else class="grid favorites-grid">
     <template v-for="favorite in favorites" :key="favorite.id">
       <FavoritesListCard
         :favoriteCat="favorite"
@@ -43,5 +46,12 @@ const handleEdit = (id: FavoriteCatId) => {
   .favorites-grid {
     grid-template-columns: repeat(auto-fit, minmax(406px, 1fr));
   }
+}
+
+.empty-list-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 </style>
