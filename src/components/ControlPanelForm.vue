@@ -238,7 +238,7 @@ const onSubmit = async (action: FormAction) => {
 
       <div>
         <label for="tags">Tags</label>
-        <select id="tags" multiple size="10" v-model="selectedTags" v-bind="tagsProps">
+        <select id="tags" multiple size="8" v-model="selectedTags" v-bind="tagsProps">
           <option disabled value="">Select the cutest tags...</option>
           <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
         </select>

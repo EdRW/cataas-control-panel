@@ -61,7 +61,7 @@ const { cat, isFetching: loading, error } = useCataasFetch(cataasFetchOptions).i
 
 img {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 300px;
   border-radius: 10px;
 }
 
