@@ -42,9 +42,17 @@ const handleEdit = (id: FavoriteCatId) => {
 </template>
 
 <style scoped>
+/* bootstrap small breakpoint */
 @media (min-width: 768px) {
   .favorites-grid {
-    grid-template-columns: repeat(auto-fit, minmax(406px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* bootstrap large breakpoint */
+@media (min-width: 1024px) {
+  .favorites-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
